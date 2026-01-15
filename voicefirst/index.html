@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoiceFirst - Fall for the Voice, Not Just the Face</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/styles.css">
+  <style>
+    :root {
+      --primary: #7C3AED;
+      --secondary: #2DD4BF;
+      --accent: #F472B6;
+      --light: #F5F3FF;
+      --dark: #1E1B4B;
+    }
+
+    body {
+      background: var(--light);
+    }
+
+    .nav { background: transparent; }
+    .nav.scrolled { background: rgba(245, 243, 255, 0.95); }
+    .nav-logo { color: var(--primary); }
+    .nav-links a { color: var(--dark); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, #9333EA 100%);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(124, 58, 237, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+    .btn-secondary:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, var(--light) 0%, #EDE9FE 50%, #FCE7F3 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 20%;
+      left: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 10%;
+      right: -5%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(244, 114, 182, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .hero-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-text h1 {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--dark);
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-text h1 span {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-text p {
+      font-size: 1.25rem;
+      color: #666;
+      margin-bottom: 2rem;
+      max-width: 500px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-badges {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-sm);
+      font-size: 0.9rem;
+      color: var(--dark);
+    }
+
+    .hero-badge-icon {
+      font-size: 1.25rem;
+    }
+
+    /* Phone mockup in hero */
+    .hero-phone {
+      display: flex;
+      justify-content: center;
+      position: relative;
+    }
+
+    .phone-screen-content {
+      background: linear-gradient(180deg, var(--primary) 0%, #5B21B6 100%);
+      height: 100%;
+      padding: 50px 16px 16px;
+      color: white;
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .app-logo {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .voice-card {
+      background: white;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+    }
+
+    .voice-avatar {
+      height: 160px;
+      background: linear-gradient(135deg, #818CF8 0%, #C084FC 50%, #F472B6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .avatar-blur {
+      width: 100px;
+      height: 100px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+    }
+
+    .blur-label {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.5);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .voice-info {
+      padding: 16px;
+      color: var(--dark);
+    }
+
+    .voice-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .voice-detail {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .voice-player {
+      background: var(--light);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .play-btn {
+      width: 44px;
+      height: 44px;
+      background: var(--primary);
+      border-radius: 50%;
+      border: none;
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .waveform {
+      flex: 1;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .wave-bar {
+      width: 3px;
+      background: var(--primary);
+      border-radius: 2px;
+      opacity: 0.5;
+    }
+
+    .wave-bar.active {
+      opacity: 1;
+      animation: waveAnim 0.5s ease infinite;
+    }
+
+    @keyframes waveAnim {
+      0%, 100% { height: 10px; }
+      50% { height: 25px; }
+    }
+
+    .voice-duration {
+      font-size: 0.75rem;
+      color: #666;
+      font-weight: 600;
+    }
+
+    .voice-actions {
+      display: flex;
+      gap: 12px;
+      padding: 16px;
+      padding-top: 0;
+    }
+
+    .voice-action-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .voice-action-btn.skip {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .voice-action-btn.like {
+      background: var(--primary);
+      color: white;
+    }
+
+    .voice-action-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Concept section */
+    .concept-section {
+      padding: 6rem 0;
+      background: white;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 4rem;
+    }
+
+    .section-tag {
+      display: inline-block;
+      background: rgba(124, 58, 237, 0.1);
+      color: var(--primary);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+      font-size: 1.125rem;
+      color: #666;
+    }
+
+    /* Problem Cards */
+    .pain-points {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .pain-card {
+      background: #FEF2F2;
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+      border-left: 4px solid #EF4444;
+    }
+
+    .pain-card h3 {
+      color: #991B1B;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .pain-card p {
+      color: #7F1D1D;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    /* Phases section */
+    .phases-section {
+      padding: 6rem 0;
+      background: linear-gradient(180deg, var(--dark) 0%, #312E81 100%);
+      color: white;
+    }
+
+    .phases-section .section-tag {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    .phases-section .section-title {
+      color: white;
+    }
+
+    .phases-section .section-subtitle {
+      color: rgba(255,255,255,0.8);
+    }
+
+    .phases-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      position: relative;
+    }
+
+    .phases-grid::before {
+      content: '';
+      position: absolute;
+      top: 60px;
+      left: 20%;
+      right: 20%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--secondary), var(--primary), var(--accent));
+      border-radius: 2px;
+    }
+
+    .phase-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+
+    .phase-number {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin: 0 auto 1.5rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .phase-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .phase-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .phase-card p {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.95rem;
+    }
+
+    .phase-unlock {
+      background: rgba(45, 212, 191, 0.2);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      margin-top: 1rem;
+      display: inline-block;
+    }
+
+    /* Features */
+    .features-section {
+      padding: 6rem 0;
+      background: white;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      background: var(--light);
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .feature-icon-wrap {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-card h3 {
+      color: var(--dark);
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    /* Testimonial */
+    .testimonial-section {
+      padding: 6rem 0;
+      background: var(--light);
+    }
+
+    .testimonial-card {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 3rem;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+    }
+
+    .testimonial-quote {
+      font-size: 1.5rem;
+      color: var(--dark);
+      font-style: italic;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .testimonial-avatar {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .testimonial-info h4 {
+      color: var(--dark);
+      font-size: 1.1rem;
+    }
+
+    .testimonial-info p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    /* CTA */
+    .cta-section {
+      padding: 6rem 0;
+      background: linear-gradient(135deg, var(--primary) 0%, #5B21B6 50%, var(--accent) 100%);
+      color: white;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .cta-section h2 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .cta-section p {
+      font-size: 1.25rem;
+      opacity: 0.9;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .cta-section .btn-primary {
+      background: white;
+      color: var(--primary);
+    }
+
+    .cta-section .btn-primary:hover {
+      background: var(--light);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+
+    /* Footer */
+    footer {
+      background: var(--dark);
+      color: white;
+      padding: 3rem 0;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .hero-text p {
+        margin: 0 auto 2rem;
+      }
+
+      .hero-buttons, .hero-badges {
+        justify-content: center;
+      }
+
+      .phases-grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .phases-grid::before {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero-text h1 {
+        font-size: 2.5rem;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="container nav-content">
+      <a href="#" class="nav-logo">VoiceFirst</a>
+      <ul class="nav-links">
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#" class="btn btn-primary">Download App</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="hero-text animate-slide-up">
+        <h1>Fall for the <span>Voice</span>,<br>Not Just the Face</h1>
+        <p>The dating app where personality comes first. Hear their voice, feel the connection, then see the face.</p>
+        <div class="hero-buttons">
+          <a href="#" class="btn btn-primary btn-lg">Start Listening</a>
+          <a href="#how-it-works" class="btn btn-secondary btn-lg">How It Works</a>
+        </div>
+        <div class="hero-badges">
+          <div class="hero-badge">
+            <span class="hero-badge-icon">🎙️</span>
+            Voice profiles only
+          </div>
+          <div class="hero-badge">
+            <span class="hero-badge-icon">🔒</span>
+            Photos unlock after match
+          </div>
+          <div class="hero-badge">
+            <span class="hero-badge-icon">💜</span>
+            Deeper connections
+          </div>
+        </div>
+      </div>
+      <div class="hero-phone">
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="phone-screen-content">
+              <div class="app-header">
+                <div class="app-logo">VoiceFirst</div>
+                <span style="font-size: 1.5rem;">🎧</span>
+              </div>
+              <div class="voice-card">
+                <div class="voice-avatar">
+                  <div class="avatar-blur">🎭</div>
+                  <div class="blur-label">🔒 Photo unlocks after voice match</div>
+                </div>
+                <div class="voice-info">
+                  <div class="voice-name">Mystery Match</div>
+                  <div class="voice-detail">28 • 3 miles away • "Looking for something real"</div>
+                  <div class="voice-player">
+                    <button class="play-btn" id="playBtn">▶</button>
+                    <div class="waveform" id="waveform"></div>
+                    <span class="voice-duration">0:30</span>
+                  </div>
+                </div>
+                <div class="voice-actions">
+                  <button class="voice-action-btn skip">Skip</button>
+                  <button class="voice-action-btn like">💜 Like Voice</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="concept-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">THE PROBLEM</span>
+        <h2 class="section-title">Photo-First Dating Is Broken</h2>
+        <p class="section-subtitle">Great personalities are being overlooked every day.</p>
+      </div>
+      <div class="pain-points">
+        <div class="pain-card">
+          <h3>📸 Not Photogenic?</h3>
+          <p>"I'm way better in person" - but you never get the chance to prove it.</p>
+        </div>
+        <div class="pain-card">
+          <h3>👤 Superficial Swiping</h3>
+          <p>98% of decisions made in under 1 second based on a single photo.</p>
+        </div>
+        <div class="pain-card">
+          <h3>😔 Great Personality, No Matches</h3>
+          <p>Wit, humor, and charm don't show in a profile picture.</p>
+        </div>
+        <div class="pain-card">
+          <h3>💔 Catfishing Concerns</h3>
+          <p>Photos can be edited, filtered, or years old. Voice is authentic.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works - Phases -->
+  <section class="phases-section" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">HOW IT WORKS</span>
+        <h2 class="section-title">Progressive Reveal Dating</h2>
+        <p class="section-subtitle">Connection builds in phases, naturally.</p>
+      </div>
+      <div class="phases-grid">
+        <div class="phase-card">
+          <div class="phase-number">1</div>
+          <div class="phase-icon">🎙️</div>
+          <h3>Voice Only</h3>
+          <p>Record a 30-second voice intro. Browse and like based on voice alone.</p>
+          <div class="phase-unlock">Hear personality first</div>
+        </div>
+        <div class="phase-card">
+          <div class="phase-number">2</div>
+          <div class="phase-icon">💬</div>
+          <h3>Voice Chat</h3>
+          <p>Matched! Send voice messages back and forth. Get to know each other.</p>
+          <div class="phase-unlock">Blurred photo hint unlocks</div>
+        </div>
+        <div class="phase-card">
+          <div class="phase-number">3</div>
+          <div class="phase-icon">📷</div>
+          <h3>Photos Revealed</h3>
+          <p>After 5+ voice messages, full photos unlock. You already like their personality!</p>
+          <div class="phase-unlock">Full connection</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features-section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">FEATURES</span>
+        <h2 class="section-title">Why VoiceFirst Works</h2>
+        <p class="section-subtitle">Designed for deeper, more authentic connections.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-wrap">🎤</div>
+          <h3>30-Second Voice Intros</h3>
+          <p>Record your authentic voice intro. Talk about your passions, your humor, what makes you, you.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">🔮</div>
+          <h3>Progressive Photo Unlock</h3>
+          <p>Photos gradually unblur as your voice connection grows. Anticipation makes the reveal special.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">🛡️</div>
+          <h3>Anti-Catfish Technology</h3>
+          <p>Voice verification ensures the person is real. Much harder to fake than photos.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">💫</div>
+          <h3>Personality Matching</h3>
+          <p>AI analyzes voice tone, energy, and communication style for better compatibility.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">🎧</div>
+          <h3>Voice Message Dating</h3>
+          <p>No more boring texting. Hear laughter, excitement, and emotion in every message.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">⭐</div>
+          <h3>Depth Over Speed</h3>
+          <p>Designed to slow down and build real connections, not endless swiping.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonial -->
+  <section class="testimonial-section">
+    <div class="container">
+      <div class="testimonial-card">
+        <div class="testimonial-quote">
+          "I've always been told I have a great personality but struggle with photos. VoiceFirst let my real self shine through. Met my partner after just 3 voice matches!"
+        </div>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">👤</div>
+          <div class="testimonial-info">
+            <h4>Alex, 32</h4>
+            <p>VoiceFirst user since beta</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <h2>Ready to Be Heard?</h2>
+      <p>Let your personality do the talking.</p>
+      <a href="#" class="btn btn-primary btn-lg">Download VoiceFirst Free</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container footer-content">
+      <div class="footer-logo">VoiceFirst</div>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Contact</a>
+        <a href="#">Blog</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('nav');
+      if (window.scrollY > 50) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    });
+
+    // Generate waveform bars
+    const waveform = document.getElementById('waveform');
+    for (let i = 0; i < 30; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'wave-bar';
+      bar.style.height = Math.random() * 20 + 8 + 'px';
+      waveform.appendChild(bar);
+    }
+
+    // Play button animation
+    const playBtn = document.getElementById('playBtn');
+    let isPlaying = false;
+
+    playBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      playBtn.textContent = isPlaying ? '⏸' : '▶';
+
+      const bars = document.querySelectorAll('.wave-bar');
+      bars.forEach((bar, index) => {
+        if (isPlaying) {
+          bar.classList.add('active');
+          bar.style.animationDelay = (index * 0.05) + 's';
+        } else {
+          bar.classList.remove('active');
+        }
+      });
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // Animate elements on scroll
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-fade-in');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.pain-card, .phase-card, .feature-card').forEach(el => {
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dating App Concepts - IntentMatch & VoiceFirst</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 80px 0 60px;
+    }
+
+    .header h1 {
+      font-size: 3.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #E63946, #7C3AED, #F472B6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+
+    .header p {
+      font-size: 1.25rem;
+      color: rgba(255,255,255,0.7);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Problem Statement */
+    .problem-section {
+      background: rgba(255,255,255,0.05);
+      border-radius: 24px;
+      padding: 40px;
+      margin-bottom: 60px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .problem-section h2 {
+      font-size: 1.5rem;
+      color: #E63946;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pain-points {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .pain-point {
+      background: rgba(230, 57, 70, 0.1);
+      border-left: 3px solid #E63946;
+      padding: 16px;
+      border-radius: 8px;
+    }
+
+    .pain-point h4 {
+      color: #E63946;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .pain-point p {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.85rem;
+    }
+
+    /* App Cards */
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 40px;
+      margin-bottom: 80px;
+    }
+
+    .app-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .app-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .app-card.intentmatch:hover {
+      box-shadow: 0 20px 60px rgba(230, 57, 70, 0.3);
+    }
+
+    .app-card.voicefirst:hover {
+      box-shadow: 0 20px 60px rgba(124, 58, 237, 0.3);
+    }
+
+    .app-header {
+      padding: 40px;
+      position: relative;
+    }
+
+    .app-header.intentmatch {
+      background: linear-gradient(135deg, #E63946 0%, #c1121f 100%);
+    }
+
+    .app-header.voicefirst {
+      background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+    }
+
+    .app-logo {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .app-tagline {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .app-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.2);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .app-content {
+      padding: 32px 40px 40px;
+    }
+
+    .app-description {
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .features-list {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .features-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: rgba(255,255,255,0.9);
+      font-size: 0.95rem;
+    }
+
+    .features-list .icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+    }
+
+    .features-list .icon.intentmatch {
+      background: rgba(230, 57, 70, 0.2);
+      color: #E63946;
+    }
+
+    .features-list .icon.voicefirst {
+      background: rgba(124, 58, 237, 0.2);
+      color: #7C3AED;
+    }
+
+    .pricing-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+
+    .pricing-badge.intentmatch {
+      background: rgba(230, 57, 70, 0.2);
+      color: #E63946;
+    }
+
+    .pricing-badge.voicefirst {
+      background: rgba(124, 58, 237, 0.2);
+      color: #7C3AED;
+    }
+
+    .app-links {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .btn-primary.intentmatch {
+      background: linear-gradient(135deg, #E63946 0%, #c1121f 100%);
+      color: white;
+    }
+
+    .btn-primary.intentmatch:hover {
+      box-shadow: 0 8px 30px rgba(230, 57, 70, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary.voicefirst {
+      background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+      color: white;
+    }
+
+    .btn-primary.voicefirst:hover {
+      box-shadow: 0 8px 30px rgba(124, 58, 237, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* Tech Stack */
+    .tech-section {
+      text-align: center;
+      padding: 60px 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .tech-section h3 {
+      font-size: 1.25rem;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 24px;
+    }
+
+    .tech-badges {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .tech-badge {
+      background: rgba(255,255,255,0.1);
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 40px 0;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 640px) {
+      .header h1 {
+        font-size: 2.5rem;
+      }
+
+      .apps-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .app-header, .app-content {
+        padding: 24px;
+      }
+
+      .app-links {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Dating App Concepts</h1>
+      <p>Two innovative solutions to fix the broken world of online dating. Stop swiping, start connecting.</p>
+    </header>
+
+    <section class="problem-section">
+      <h2>The Problem with Dating Apps</h2>
+      <div class="pain-points">
+        <div class="pain-point">
+          <h4>Swipe Fatigue</h4>
+          <p>"Like a second job" - endless swiping with no results</p>
+        </div>
+        <div class="pain-point">
+          <h4>Ghosting Epidemic</h4>
+          <p>72% of matches disappear mid-conversation</p>
+        </div>
+        <div class="pain-point">
+          <h4>Time Wasters</h4>
+          <p>People collecting matches for ego, not dating</p>
+        </div>
+        <div class="pain-point">
+          <h4>Superficiality</h4>
+          <p>98% of decisions made in under 1 second based on photos</p>
+        </div>
+        <div class="pain-point">
+          <h4>Poor Matching</h4>
+          <p>Only 11% say algorithms match them well</p>
+        </div>
+        <div class="pain-point">
+          <h4>Premium Paywalls</h4>
+          <p>Essential features locked behind expensive subscriptions</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="apps-grid">
+      <!-- IntentMatch Card -->
+      <div class="app-card intentmatch">
+        <div class="app-header intentmatch">
+          <span class="app-badge">Anti-Ghosting</span>
+          <div class="app-logo">IntentMatch</div>
+          <div class="app-tagline">Stop Swiping. Start Dating.</div>
+        </div>
+        <div class="app-content">
+          <p class="app-description">
+            The commitment-first dating app where every match comes with a scheduled date.
+            No more endless chatting - select your available time slots before matching,
+            and when you match, a date is automatically scheduled.
+          </p>
+
+          <ul class="features-list">
+            <li>
+              <span class="icon intentmatch">1</span>
+              <span><strong>Date Windows First</strong> - Select when you're free before swiping</span>
+            </li>
+            <li>
+              <span class="icon intentmatch">2</span>
+              <span><strong>Auto-Scheduling</strong> - Match = automatically scheduled date</span>
+            </li>
+            <li>
+              <span class="icon intentmatch">3</span>
+              <span><strong>24-Hour Chat Window</strong> - Confirm logistics, then meet IRL</span>
+            </li>
+            <li>
+              <span class="icon intentmatch">4</span>
+              <span><strong>Post-Date Feedback</strong> - Build accountability with ratings</span>
+            </li>
+          </ul>
+
+          <div class="pricing-badge intentmatch">$9.99/month Premium</div>
+
+          <div class="app-links">
+            <a href="intentmatch/index.html" class="btn btn-primary intentmatch">View Landing Page</a>
+            <a href="#" class="btn btn-secondary">React Native App</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- VoiceFirst Card -->
+      <div class="app-card voicefirst">
+        <div class="app-header voicefirst">
+          <span class="app-badge">Voice-First</span>
+          <div class="app-logo">VoiceFirst</div>
+          <div class="app-tagline">Fall for the Voice, Not Just the Face</div>
+        </div>
+        <div class="app-content">
+          <p class="app-description">
+            The dating app where personality comes first. Create 30-second voice intros,
+            match based on voice alone, and photos unlock progressively as your voice
+            connection grows. Perfect for people who are "better in person."
+          </p>
+
+          <ul class="features-list">
+            <li>
+              <span class="icon voicefirst">1</span>
+              <span><strong>Voice-Only Profiles</strong> - 30-second voice intros showcase personality</span>
+            </li>
+            <li>
+              <span class="icon voicefirst">2</span>
+              <span><strong>Progressive Photo Reveal</strong> - Photos unlock after voice matching</span>
+            </li>
+            <li>
+              <span class="icon voicefirst">3</span>
+              <span><strong>Voice Messaging</strong> - No more boring texting</span>
+            </li>
+            <li>
+              <span class="icon voicefirst">4</span>
+              <span><strong>Anti-Catfish Tech</strong> - Voice verification ensures authenticity</span>
+            </li>
+          </ul>
+
+          <div class="pricing-badge voicefirst">Freemium Model</div>
+
+          <div class="app-links">
+            <a href="voicefirst/index.html" class="btn btn-primary voicefirst">View Landing Page</a>
+            <a href="#" class="btn btn-secondary">React Native App</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="tech-section">
+      <h3>Built With</h3>
+      <div class="tech-badges">
+        <span class="tech-badge">React Native</span>
+        <span class="tech-badge">Expo</span>
+        <span class="tech-badge">TypeScript</span>
+        <span class="tech-badge">React Navigation</span>
+        <span class="tech-badge">HTML/CSS</span>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Dating App Concepts - Solving the broken world of online dating</p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,144 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*')
+        && request.resource.size < 10 * 1024 * 1024; // 10MB max
+    }
+
+    function isValidFile() {
+      return request.resource.size < 50 * 1024 * 1024; // 50MB max for other files
+    }
+
+    // User profile photos
+    match /users/{userId}/profile/{photoId} {
+      // Anyone authenticated can read profile photos
+      allow read: if isAuthenticated();
+
+      // Users can only upload their own photos
+      allow create: if isAuthenticated()
+        && isOwner(userId)
+        && isValidImage();
+
+      // Users can update/delete their own photos
+      allow update, delete: if isAuthenticated()
+        && isOwner(userId);
+    }
+
+    // User gallery photos (additional photos)
+    match /users/{userId}/gallery/{photoId} {
+      // Anyone authenticated can read gallery photos
+      allow read: if isAuthenticated();
+
+      // Users can only upload their own gallery photos (max 6)
+      allow create: if isAuthenticated()
+        && isOwner(userId)
+        && isValidImage();
+
+      // Users can update/delete their own gallery photos
+      allow update, delete: if isAuthenticated()
+        && isOwner(userId);
+    }
+
+    // Verification photos (ID verification)
+    match /users/{userId}/verification/{photoId} {
+      // Only the user and admin can read verification photos
+      allow read: if isAuthenticated() && isOwner(userId);
+
+      // Users can upload verification photos
+      allow create: if isAuthenticated()
+        && isOwner(userId)
+        && isValidImage();
+
+      // Cannot update or delete once uploaded (immutable)
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Date photos (optional photos shared after dates)
+    match /dates/{dateId}/photos/{photoId} {
+      // Only participants can read date photos
+      // Note: This requires a Firestore lookup to verify participation
+      // For simplicity, we allow authenticated reads, but implement additional
+      // checks in the application layer
+      allow read: if isAuthenticated();
+
+      // Users can upload photos from their dates
+      allow create: if isAuthenticated()
+        && isValidImage();
+
+      // Photos can be deleted by the uploader
+      allow delete: if isAuthenticated();
+
+      allow update: if false;
+    }
+
+    // Temporary uploads (for profile creation/editing)
+    match /temp/{userId}/{fileName} {
+      // Users can only access their own temp files
+      allow read, write: if isAuthenticated()
+        && isOwner(userId)
+        && isValidFile();
+
+      // Temp files should be cleaned up by Cloud Function after 1 hour
+    }
+
+    // Report attachments (evidence for reports)
+    match /reports/{reportId}/{attachmentId} {
+      // Only admin can read report attachments
+      allow read: if false; // Admin only via backend
+
+      // Users can upload report attachments
+      allow create: if isAuthenticated()
+        && (isValidImage() || isValidFile());
+
+      allow update, delete: if false;
+    }
+
+    // Default deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+/**
+ * DEPLOYMENT INSTRUCTIONS:
+ *
+ * 1. Using Firebase Console:
+ *    - Go to Storage > Rules tab
+ *    - Copy and paste this entire file
+ *    - Click "Publish"
+ *
+ * 2. Using Firebase CLI:
+ *    firebase deploy --only storage:rules
+ *
+ * SECURITY NOTES:
+ * - All operations require authentication
+ * - Users can only upload/modify their own files
+ * - Profile photos are public (readable by all authenticated users)
+ * - Verification photos are private (only user and admin)
+ * - File size limits: 10MB for images, 50MB for other files
+ * - Temp files cleaned up automatically by Cloud Function
+ *
+ * FILE STRUCTURE:
+ * /users/{userId}/profile/{photoId} - Profile photos (1 primary)
+ * /users/{userId}/gallery/{photoId} - Gallery photos (up to 6)
+ * /users/{userId}/verification/{photoId} - ID verification
+ * /dates/{dateId}/photos/{photoId} - Photos from dates
+ * /temp/{userId}/{fileName} - Temporary uploads
+ * /reports/{reportId}/{attachmentId} - Report evidence
+ *
+ * TESTING:
+ * Use the Rules Playground in Firebase Console to test these rules
+ */

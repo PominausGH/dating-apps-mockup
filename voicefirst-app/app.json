@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "VoiceFirst",
+    "slug": "voicefirst",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#7C3AED"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.voicefirst.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "VoiceFirst needs microphone access to record your voice intro and messages.",
+        "NSCameraUsageDescription": "VoiceFirst needs camera access to take profile photos.",
+        "NSPhotoLibraryUsageDescription": "VoiceFirst needs photo library access to select profile photos.",
+        "NSLocationWhenInUseUsageDescription": "VoiceFirst needs location access to find matches near you."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#7C3AED"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.voicefirst.app",
+      "permissions": [
+        "RECORD_AUDIO",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow VoiceFirst to access your microphone to record voice intros and messages."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    }
+  }
+}

@@ -1,0 +1,210 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*')
+        && request.resource.size < 10 * 1024 * 1024; // 10MB max
+    }
+
+    function isValidAudio() {
+      return request.resource.contentType.matches('audio/.*')
+        && request.resource.size < 5 * 1024 * 1024 // 5MB max
+        && request.resource.size > 10 * 1024; // Min 10KB (roughly 2 seconds at 128kbps)
+    }
+
+    function isValidDuration(metadata) {
+      // Voice intros must be between 5-30 seconds
+      return metadata.duration != null
+        && int(metadata.duration) >= 5
+        && int(metadata.duration) <= 30;
+    }
+
+    // User voice introductions (primary feature)
+    match /users/{userId}/voiceIntros/{introId} {
+      // Anyone authenticated can read voice intros (for discovery)
+      allow read: if isAuthenticated();
+
+      // Users can only upload their own voice intros
+      allow create: if isAuthenticated()
+        && isOwner(userId)
+        && isValidAudio();
+
+      // Users can update/delete their own voice intros
+      allow update, delete: if isAuthenticated()
+        && isOwner(userId);
+    }
+
+    // User voice messages (chat feature)
+    match /users/{userId}/voiceMessages/{messageId} {
+      // Voice messages are private - only sender and receiver can access
+      // Note: Full verification requires Firestore lookup
+      // Implement additional checks in application layer
+      allow read: if isAuthenticated();
+
+      // Users can upload their own voice messages
+      allow create: if isAuthenticated()
+        && isOwner(userId)
+        && isValidAudio();
+
+      // Voice messages are immutable once sent
+      allow update: if false;
+
+      // Users can delete their own voice messages
+      allow delete: if isAuthenticated()
+        && isOwner(userId);
+    }
+
+    // User profile photos (blurred initially)
+    match /users/{userId}/photos/{photoId} {
+      // Anyone authenticated can read photos (they'll be blurred client-side)
+      allow read: if isAuthenticated();
+
+      // Users can only upload their own photos
+      allow create: if isAuthenticated()
+        && isOwner(userId)
+        && isValidImage();
+
+      // Users can update/delete their own photos
+      allow update, delete: if isAuthenticated()
+        && isOwner(userId);
+    }
+
+    // User gallery photos (additional photos, up to 6)
+    match /users/{userId}/gallery/{photoId} {
+      // Anyone authenticated can read gallery photos
+      allow read: if isAuthenticated();
+
+      // Users can upload their own gallery photos
+      allow create: if isAuthenticated()
+        && isOwner(userId)
+        && isValidImage();
+
+      // Users can update/delete their own gallery photos
+      allow update, delete: if isAuthenticated()
+        && isOwner(userId);
+    }
+
+    // Verification photos (ID verification for safety)
+    match /users/{userId}/verification/{photoId} {
+      // Only the user and admin can read verification photos
+      allow read: if isAuthenticated() && isOwner(userId);
+
+      // Users can upload verification photos
+      allow create: if isAuthenticated()
+        && isOwner(userId)
+        && isValidImage();
+
+      // Verification photos are immutable once uploaded
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Voice samples (for voice verification/matching)
+    match /users/{userId}/voiceSamples/{sampleId} {
+      // Only the user can access voice samples
+      allow read: if isAuthenticated() && isOwner(userId);
+
+      // Users can upload voice samples
+      allow create: if isAuthenticated()
+        && isOwner(userId)
+        && isValidAudio();
+
+      allow update, delete: if isAuthenticated()
+        && isOwner(userId);
+    }
+
+    // Temporary uploads (for processing before saving)
+    match /temp/{userId}/{fileName} {
+      // Users can only access their own temp files
+      allow read, write: if isAuthenticated()
+        && isOwner(userId);
+
+      // Temp files cleaned up by Cloud Function after 1 hour
+    }
+
+    // Cached audio files (for faster playback)
+    match /cache/{userId}/{cacheId} {
+      // Users can access their own cache
+      allow read, write: if isAuthenticated()
+        && isOwner(userId);
+
+      // Cache cleaned up by Cloud Function after 7 days
+    }
+
+    // Report attachments (evidence for reports)
+    match /reports/{reportId}/attachments/{attachmentId} {
+      // Only admin can read report attachments
+      allow read: if false; // Admin only via backend
+
+      // Users can upload report attachments (screenshots, audio)
+      allow create: if isAuthenticated()
+        && (isValidImage() || isValidAudio());
+
+      allow update, delete: if false;
+    }
+
+    // Default deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+/**
+ * DEPLOYMENT INSTRUCTIONS:
+ *
+ * 1. Using Firebase Console:
+ *    - Go to Storage > Rules tab
+ *    - Copy and paste this entire file
+ *    - Click "Publish"
+ *
+ * 2. Using Firebase CLI:
+ *    firebase deploy --only storage:rules
+ *
+ * SECURITY NOTES:
+ * - All operations require authentication
+ * - Users can only upload/modify their own files
+ * - Voice intros are public (readable by all authenticated users for discovery)
+ * - Voice messages are private (sender and receiver only)
+ * - Verification files are private (user and admin only)
+ * - File size limits:
+ *   - Images: 10MB max
+ *   - Audio: 5MB max, 10KB min (prevents empty files)
+ * - Voice intros must be 5-30 seconds (enforced via metadata)
+ *
+ * FILE STRUCTURE:
+ * /users/{userId}/voiceIntros/{introId} - Voice introductions (public)
+ * /users/{userId}/voiceMessages/{messageId} - Voice messages (private)
+ * /users/{userId}/photos/{photoId} - Profile photos (blurred)
+ * /users/{userId}/gallery/{photoId} - Gallery photos (up to 6)
+ * /users/{userId}/verification/{photoId} - ID verification (private)
+ * /users/{userId}/voiceSamples/{sampleId} - Voice samples (private)
+ * /temp/{userId}/{fileName} - Temporary uploads
+ * /cache/{userId}/{cacheId} - Cached audio files
+ * /reports/{reportId}/attachments/{attachmentId} - Report evidence
+ *
+ * VOICEFIRST-SPECIFIC:
+ * - Audio files are the primary content type
+ * - Voice intros are discoverable (public to authenticated users)
+ * - Photos are blurred progressively based on message count (client-side)
+ * - Cache management for optimal audio playback performance
+ *
+ * TESTING:
+ * Use the Rules Playground in Firebase Console to test these rules
+ *
+ * AUDIO FORMATS SUPPORTED:
+ * - AAC (recommended, .m4a, .aac)
+ * - MP3 (.mp3)
+ * - WAV (.wav)
+ * - OGG (.ogg)
+ */

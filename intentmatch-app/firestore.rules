@@ -1,0 +1,207 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isParticipant(userIds) {
+      return request.auth.uid in userIds;
+    }
+
+    function isFutureTimestamp(timestamp) {
+      return timestamp > request.time;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own profile and other users' public profiles
+      allow read: if isAuthenticated();
+
+      // Users can only create/update their own profile
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && isOwner(userId)
+        && request.resource.data.keys().hasAll(['name', 'age', 'bio'])
+        && request.resource.data.age >= 18
+        && request.resource.data.name is string
+        && request.resource.data.bio is string;
+
+      // Users cannot delete their profile (use deactivation instead)
+      allow delete: if false;
+
+      // User's availability subcollection
+      match /availability/{slotId} {
+        allow read: if isAuthenticated();
+        allow write: if isOwner(userId);
+      }
+
+      // User's preferences subcollection
+      match /preferences/{prefId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+    }
+
+    // Matches collection
+    match /matches/{matchId} {
+      // Users can only read matches they're part of
+      allow read: if isAuthenticated()
+        && isParticipant([resource.data.user1Id, resource.data.user2Id]);
+
+      // System creates matches (handled by Cloud Function)
+      allow create: if false;
+
+      // Users can update match status if they're a participant
+      allow update: if isAuthenticated()
+        && isParticipant([resource.data.user1Id, resource.data.user2Id])
+        && (!request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['user1Id', 'user2Id', 'createdAt']));
+
+      allow delete: if false;
+    }
+
+    // Scheduled dates collection
+    match /scheduledDates/{dateId} {
+      // Users can read dates they're part of
+      allow read: if isAuthenticated()
+        && isParticipant([resource.data.user1Id, resource.data.user2Id]);
+
+      // System creates scheduled dates (Cloud Function)
+      allow create: if false;
+
+      // Users can update confirmation status and venue selection
+      allow update: if isAuthenticated()
+        && isParticipant([resource.data.user1Id, resource.data.user2Id])
+        && (!request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['user1Id', 'user2Id', 'createdAt', 'matchId']));
+
+      allow delete: if false;
+    }
+
+    // Messages collection
+    match /messages/{messageId} {
+      // Users can read messages from their conversations
+      allow read: if isAuthenticated()
+        && isParticipant([resource.data.senderId, resource.data.receiverId]);
+
+      // Users can create messages if they're the sender
+      allow create: if isAuthenticated()
+        && isOwner(request.resource.data.senderId)
+        && request.resource.data.keys().hasAll(['senderId', 'receiverId', 'text', 'timestamp', 'matchId'])
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 1000
+        && request.resource.data.timestamp is timestamp;
+
+      // Messages cannot be updated or deleted (immutable)
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Chat windows collection (tracks 24-hour expiration)
+    match /chatWindows/{matchId} {
+      // Users can read their chat windows
+      allow read: if isAuthenticated()
+        && isParticipant([resource.data.user1Id, resource.data.user2Id]);
+
+      // System creates chat windows
+      allow create: if false;
+
+      // System updates expiration status (Cloud Function)
+      allow update: if false;
+
+      allow delete: if false;
+    }
+
+    // Date feedback collection
+    match /dateFeedback/{feedbackId} {
+      // Users can read feedback for dates they participated in
+      allow read: if isAuthenticated()
+        && isParticipant([resource.data.user1Id, resource.data.user2Id])
+        && resource.data.bothSubmitted == true;
+
+      // Users can create their own feedback once
+      allow create: if isAuthenticated()
+        && isOwner(request.resource.data.userId)
+        && request.resource.data.keys().hasAll(['userId', 'dateId', 'rating', 'didMeet', 'wouldSeeAgain'])
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5;
+
+      // Cannot update or delete feedback (immutable)
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Venues collection (read-only reference data)
+    match /venues/{venueId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only admins can write via backend
+    }
+
+    // Reports collection (for reporting users)
+    match /reports/{reportId} {
+      // Users can only read their own reports
+      allow read: if isAuthenticated() && isOwner(resource.data.reporterId);
+
+      // Users can create reports
+      allow create: if isAuthenticated()
+        && isOwner(request.resource.data.reporterId)
+        && request.resource.data.keys().hasAll(['reporterId', 'reportedUserId', 'reason', 'timestamp'])
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() > 0;
+
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Blocks collection (for blocking users)
+    match /blocks/{blockId} {
+      // Users can read their own blocks
+      allow read: if isAuthenticated() && isOwner(resource.data.blockerId);
+
+      // Users can create blocks
+      allow create: if isAuthenticated()
+        && isOwner(request.resource.data.blockerId);
+
+      // Users can delete their blocks (unblock)
+      allow delete: if isAuthenticated() && isOwner(resource.data.blockerId);
+
+      allow update: if false;
+    }
+
+    // Analytics collection (system writes only)
+    match /analytics/{docId} {
+      allow read: if false; // Admin only via backend
+      allow write: if false; // Cloud Functions only
+    }
+  }
+}
+
+/**
+ * DEPLOYMENT INSTRUCTIONS:
+ *
+ * 1. Using Firebase Console:
+ *    - Go to Firestore Database > Rules tab
+ *    - Copy and paste this entire file
+ *    - Click "Publish"
+ *
+ * 2. Using Firebase CLI:
+ *    firebase deploy --only firestore:rules
+ *
+ * SECURITY NOTES:
+ * - All operations require authentication
+ * - Users can only access their own data and matches they're part of
+ * - Messages are immutable (cannot be edited/deleted)
+ * - Feedback is immutable once submitted
+ * - System operations (match creation, chat expiration) handled by Cloud Functions
+ * - Admin operations require backend/Cloud Functions
+ *
+ * TESTING:
+ * Use the Rules Playground in Firebase Console to test these rules before deploying
+ */

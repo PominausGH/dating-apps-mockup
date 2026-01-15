@@ -1,0 +1,220 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isParticipant(userIds) {
+      return request.auth.uid in userIds;
+    }
+
+    function isValidMessageCount(count) {
+      return count >= 0 && count <= 1000;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own profile and other users' public profiles
+      allow read: if isAuthenticated();
+
+      // Users can only create/update their own profile
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && isOwner(userId)
+        && request.resource.data.keys().hasAll(['name', 'age', 'bio', 'voiceIntroUri'])
+        && request.resource.data.age >= 18
+        && request.resource.data.name is string
+        && request.resource.data.bio is string
+        && request.resource.data.voiceIntroUri is string;
+
+      // Users cannot delete their profile (use deactivation instead)
+      allow delete: if false;
+
+      // User's preferences subcollection
+      match /preferences/{prefId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+
+      // User's voice recordings subcollection
+      match /voiceIntros/{introId} {
+        allow read: if isAuthenticated();
+        allow write: if isOwner(userId);
+      }
+    }
+
+    // Matches collection
+    match /matches/{matchId} {
+      // Users can only read matches they're part of
+      allow read: if isAuthenticated()
+        && isParticipant([resource.data.user1Id, resource.data.user2Id]);
+
+      // System creates matches (handled by Cloud Function)
+      allow create: if false;
+
+      // Users can update match status if they're a participant
+      allow update: if isAuthenticated()
+        && isParticipant([resource.data.user1Id, resource.data.user2Id])
+        && (!request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['user1Id', 'user2Id', 'createdAt']));
+
+      allow delete: if false;
+    }
+
+    // Messages collection (with message count tracking for photo blur)
+    match /messages/{messageId} {
+      // Users can read messages from their conversations
+      allow read: if isAuthenticated()
+        && isParticipant([resource.data.senderId, resource.data.receiverId]);
+
+      // Users can create messages if they're the sender
+      allow create: if isAuthenticated()
+        && isOwner(request.resource.data.senderId)
+        && request.resource.data.keys().hasAll(['senderId', 'receiverId', 'text', 'timestamp', 'matchId'])
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 1000
+        && request.resource.data.timestamp is timestamp;
+
+      // Messages cannot be updated or deleted (immutable)
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Photo unlock progress (tracks message count for progressive blur)
+    match /photoUnlockProgress/{matchId} {
+      // Users can read unlock progress for their matches
+      allow read: if isAuthenticated()
+        && isParticipant([resource.data.user1Id, resource.data.user2Id]);
+
+      // System updates unlock progress (Cloud Function triggered on new message)
+      allow create: if false;
+      allow update: if false;
+
+      allow delete: if false;
+    }
+
+    // Voice playback stats (for analytics and recommendations)
+    match /voicePlaybackStats/{statId} {
+      // Users can read their own stats
+      allow read: if isAuthenticated() && isOwner(resource.data.listenerId);
+
+      // System creates playback stats
+      allow create: if isAuthenticated()
+        && isOwner(request.resource.data.listenerId);
+
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Likes/Passes collection
+    match /swipes/{swipeId} {
+      // Users can read their own swipes
+      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+
+      // Users can create their own swipes
+      allow create: if isAuthenticated()
+        && isOwner(request.resource.data.userId)
+        && request.resource.data.keys().hasAll(['userId', 'targetUserId', 'action', 'timestamp'])
+        && request.resource.data.action in ['like', 'pass'];
+
+      // Swipes are immutable
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Reports collection (for reporting users)
+    match /reports/{reportId} {
+      // Users can only read their own reports
+      allow read: if isAuthenticated() && isOwner(resource.data.reporterId);
+
+      // Users can create reports
+      allow create: if isAuthenticated()
+        && isOwner(request.resource.data.reporterId)
+        && request.resource.data.keys().hasAll(['reporterId', 'reportedUserId', 'reason', 'timestamp'])
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() > 0;
+
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Blocks collection (for blocking users)
+    match /blocks/{blockId} {
+      // Users can read their own blocks
+      allow read: if isAuthenticated() && isOwner(resource.data.blockerId);
+
+      // Users can create blocks
+      allow create: if isAuthenticated()
+        && isOwner(request.resource.data.blockerId);
+
+      // Users can delete their blocks (unblock)
+      allow delete: if isAuthenticated() && isOwner(resource.data.blockerId);
+
+      allow update: if false;
+    }
+
+    // Premium subscriptions
+    match /subscriptions/{userId} {
+      // Users can only read their own subscription
+      allow read: if isAuthenticated() && isOwner(userId);
+
+      // System manages subscriptions (Stripe webhooks)
+      allow create, update: if false;
+
+      allow delete: if false;
+    }
+
+    // Voice prompts (read-only reference data)
+    match /voicePrompts/{promptId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only admins via backend
+    }
+
+    // Analytics collection (system writes only)
+    match /analytics/{docId} {
+      allow read: if false; // Admin only via backend
+      allow write: if false; // Cloud Functions only
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+/**
+ * DEPLOYMENT INSTRUCTIONS:
+ *
+ * 1. Using Firebase Console:
+ *    - Go to Firestore Database > Rules tab
+ *    - Copy and paste this entire file
+ *    - Click "Publish"
+ *
+ * 2. Using Firebase CLI:
+ *    firebase deploy --only firestore:rules
+ *
+ * SECURITY NOTES:
+ * - All operations require authentication
+ * - Users can only access their own data and matches they're part of
+ * - Messages are immutable (cannot be edited/deleted)
+ * - Voice playback stats track user engagement
+ * - Photo unlock progress managed by Cloud Functions
+ * - Premium subscriptions managed by Stripe webhooks
+ *
+ * VOICEFIRST-SPECIFIC FEATURES:
+ * - Voice intro URIs stored in user profiles
+ * - Photo unlock progress tracks message count for progressive blur
+ * - Voice playback stats for recommendations
+ * - Swipes (likes/passes) tracked for matching algorithm
+ *
+ * TESTING:
+ * Use the Rules Playground in Firebase Console to test these rules before deploying
+ */

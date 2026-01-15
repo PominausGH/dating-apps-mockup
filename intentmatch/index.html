@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IntentMatch - Stop Swiping. Start Dating.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/styles.css">
+  <style>
+    :root {
+      --primary: #E63946;
+      --secondary: #1D3557;
+      --accent: #F4A261;
+      --light: #F1FAEE;
+      --dark: #1D3557;
+    }
+
+    body {
+      background: var(--light);
+    }
+
+    .nav { background: transparent; }
+    .nav.scrolled { background: rgba(241, 250, 238, 0.95); }
+    .nav-logo { color: var(--primary); }
+    .nav-links a { color: var(--secondary); }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #c1121f;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--secondary);
+      border: 2px solid var(--secondary);
+    }
+    .btn-secondary:hover {
+      background: var(--secondary);
+      color: white;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, var(--light) 0%, #ffffff 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(230, 57, 70, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .hero-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .hero-text h1 {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--secondary);
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-text h1 span {
+      color: var(--primary);
+    }
+
+    .hero-text p {
+      font-size: 1.25rem;
+      color: #666;
+      margin-bottom: 2rem;
+      max-width: 500px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(29, 53, 87, 0.1);
+    }
+
+    .hero-stat .stat-number {
+      color: var(--primary);
+    }
+
+    .hero-stat .stat-label {
+      color: var(--secondary);
+    }
+
+    /* Phone mockup in hero */
+    .hero-phone {
+      display: flex;
+      justify-content: center;
+      position: relative;
+    }
+
+    .phone-screen-content {
+      background: linear-gradient(180deg, var(--primary) 0%, #c1121f 100%);
+      height: 100%;
+      padding: 60px 20px 20px;
+      color: white;
+    }
+
+    .app-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .app-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .match-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+      animation: slideUp 0.6s ease;
+    }
+
+    .match-photo {
+      height: 200px;
+      background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 4rem;
+    }
+
+    .match-info {
+      padding: 15px;
+      color: var(--secondary);
+    }
+
+    .match-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .match-detail {
+      font-size: 0.875rem;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .availability-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #dcfce7;
+      color: #166534;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .match-actions {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 15px;
+      border-top: 1px solid #eee;
+    }
+
+    .action-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      font-size: 1.25rem;
+      transition: all 0.2s;
+    }
+
+    .action-btn.pass {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .action-btn.like {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .action-btn:hover {
+      transform: scale(1.1);
+    }
+
+    /* Problem section */
+    .problem-section {
+      padding: 6rem 0;
+      background: white;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 4rem;
+    }
+
+    .section-tag {
+      display: inline-block;
+      background: rgba(230, 57, 70, 0.1);
+      color: var(--primary);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--secondary);
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+      font-size: 1.125rem;
+      color: #666;
+    }
+
+    .problems-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .problem-card {
+      background: var(--light);
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      border-left: 4px solid var(--primary);
+    }
+
+    .problem-card h3 {
+      color: var(--secondary);
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .problem-card p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .problem-stat {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Solution section */
+    .solution-section {
+      padding: 6rem 0;
+      background: var(--secondary);
+      color: white;
+    }
+
+    .solution-section .section-tag {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    .solution-section .section-title {
+      color: white;
+    }
+
+    .solution-section .section-subtitle {
+      color: rgba(255,255,255,0.8);
+    }
+
+    .solution-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .solution-card {
+      background: rgba(255,255,255,0.1);
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(10px);
+    }
+
+    .solution-icon {
+      width: 60px;
+      height: 60px;
+      background: var(--primary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .solution-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .solution-card p {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.95rem;
+    }
+
+    /* How it works */
+    .how-section {
+      padding: 6rem 0;
+      background: white;
+    }
+
+    .steps-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      position: relative;
+    }
+
+    .steps-container::before {
+      content: '';
+      position: absolute;
+      top: 40px;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+
+    .step {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-number {
+      width: 80px;
+      height: 80px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 0 auto 1.5rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .step h3 {
+      color: var(--secondary);
+      font-size: 1.125rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .step p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    /* Pricing */
+    .pricing-section {
+      padding: 6rem 0;
+      background: var(--light);
+    }
+
+    .pricing-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+    }
+
+    .pricing-card.featured {
+      border: 3px solid var(--primary);
+      transform: scale(1.05);
+    }
+
+    .pricing-card.featured::before {
+      content: 'MOST POPULAR';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary);
+      color: white;
+      padding: 0.25rem 1rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .pricing-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .pricing-price {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .pricing-price span {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #666;
+    }
+
+    .pricing-features {
+      list-style: none;
+      margin: 2rem 0;
+    }
+
+    .pricing-features li {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #555;
+    }
+
+    .pricing-features li::before {
+      content: '✓';
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    /* CTA */
+    .cta-section {
+      padding: 6rem 0;
+      background: linear-gradient(135deg, var(--primary) 0%, #c1121f 100%);
+      color: white;
+      text-align: center;
+    }
+
+    .cta-section h2 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+
+    .cta-section p {
+      font-size: 1.25rem;
+      opacity: 0.9;
+      margin-bottom: 2rem;
+    }
+
+    .cta-section .btn-primary {
+      background: white;
+      color: var(--primary);
+    }
+
+    .cta-section .btn-primary:hover {
+      background: var(--light);
+    }
+
+    /* Footer */
+    footer {
+      background: var(--secondary);
+      color: white;
+      padding: 3rem 0;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    /* App screens */
+    .app-demo-section {
+      padding: 6rem 0;
+      background: white;
+      overflow: hidden;
+    }
+
+    .app-screens {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .demo-phone {
+      transition: transform 0.3s ease;
+    }
+
+    .demo-phone:hover {
+      transform: translateY(-10px);
+    }
+
+    @media (max-width: 1024px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .hero-text p {
+        margin: 0 auto 2rem;
+      }
+
+      .hero-buttons {
+        justify-content: center;
+      }
+
+      .hero-stats {
+        justify-content: center;
+      }
+
+      .steps-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .steps-container::before {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero-text h1 {
+        font-size: 2.5rem;
+      }
+
+      .steps-container {
+        grid-template-columns: 1fr;
+      }
+
+      .pricing-card.featured {
+        transform: none;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="container nav-content">
+      <a href="#" class="nav-logo">IntentMatch</a>
+      <ul class="nav-links">
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#" class="btn btn-primary">Download App</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="hero-text animate-slide-up">
+        <h1>Stop Swiping.<br><span>Start Dating.</span></h1>
+        <p>The anti-ghosting dating app that matches commitment, not just photos. Every match comes with a scheduled date.</p>
+        <div class="hero-buttons">
+          <a href="#" class="btn btn-primary btn-lg">Download Free</a>
+          <a href="#how-it-works" class="btn btn-secondary btn-lg">See How It Works</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="stat-number">87%</div>
+            <div class="stat-label">Matches become dates</div>
+          </div>
+          <div class="hero-stat">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Ghosting tolerance</div>
+          </div>
+          <div class="hero-stat">
+            <div class="stat-number">24hr</div>
+            <div class="stat-label">To schedule</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-phone">
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="phone-screen-content">
+              <div class="app-header">
+                <div class="app-logo">IntentMatch</div>
+              </div>
+              <div class="match-card">
+                <div class="match-photo">👤</div>
+                <div class="match-info">
+                  <div class="match-name">Sarah, 28</div>
+                  <div class="match-detail">📍 2.3 miles away</div>
+                  <div class="match-detail">💼 Product Designer</div>
+                  <div class="availability-badge">
+                    <span>📅</span> Free Saturday evening
+                  </div>
+                </div>
+                <div class="match-actions">
+                  <button class="action-btn pass">✕</button>
+                  <button class="action-btn like">♥</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="problem-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">THE PROBLEM</span>
+        <h2 class="section-title">Dating Apps Are Broken</h2>
+        <p class="section-subtitle">You're not alone. Millions are frustrated with the same issues.</p>
+      </div>
+      <div class="problems-grid">
+        <div class="problem-card">
+          <div class="problem-stat">72%</div>
+          <h3>Get Ghosted</h3>
+          <p>Most matches disappear before the first date ever happens.</p>
+        </div>
+        <div class="problem-card">
+          <div class="problem-stat">5+ hrs</div>
+          <h3>Wasted Weekly</h3>
+          <p>Swiping endlessly feels like a second job with no results.</p>
+        </div>
+        <div class="problem-card">
+          <div class="problem-stat">11%</div>
+          <h3>Good Matches</h3>
+          <p>Only 1 in 10 say algorithms actually match them well.</p>
+        </div>
+        <div class="problem-card">
+          <div class="problem-stat">∞</div>
+          <h3>Time Wasters</h3>
+          <p>People collecting matches for ego, not actually dating.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Solution Section -->
+  <section class="solution-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">THE SOLUTION</span>
+        <h2 class="section-title">Commitment-First Dating</h2>
+        <p class="section-subtitle">We filter for people who actually want to meet up.</p>
+      </div>
+      <div class="solution-grid">
+        <div class="solution-card">
+          <div class="solution-icon">📅</div>
+          <h3>Date Windows First</h3>
+          <p>Before matching, select when you're actually free to meet. No more "let's grab coffee sometime" that never happens.</p>
+        </div>
+        <div class="solution-card">
+          <div class="solution-icon">⚡</div>
+          <h3>Auto-Scheduling</h3>
+          <p>Mutual match = automatically scheduled date at a time and place that works for both of you.</p>
+        </div>
+        <div class="solution-card">
+          <div class="solution-icon">⏰</div>
+          <h3>24-Hour Window</h3>
+          <p>Chat for 24 hours to confirm logistics. No endless texting - you're meeting in person.</p>
+        </div>
+        <div class="solution-card">
+          <div class="solution-icon">⭐</div>
+          <h3>Post-Date Feedback</h3>
+          <p>Rate your matches after meeting IRL. Build accountability and improve future matches.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-section" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">HOW IT WORKS</span>
+        <h2 class="section-title">Four Steps to a Real Date</h2>
+        <p class="section-subtitle">Simple process, real results.</p>
+      </div>
+      <div class="steps-container">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Create Profile</h3>
+          <p>Add photos, bio, and your dating preferences</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Set Availability</h3>
+          <p>Pick time slots when you're free to actually meet</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Match & Schedule</h3>
+          <p>Mutual interest = auto-scheduled date</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>Meet IRL</h3>
+          <p>Show up, have fun, rate the experience</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="pricing-section" id="pricing">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">PRICING</span>
+        <h2 class="section-title">Find Your Match</h2>
+        <p class="section-subtitle">Simple, transparent pricing. No hidden "super likes".</p>
+      </div>
+      <div class="pricing-cards">
+        <div class="pricing-card">
+          <div class="pricing-name">Free</div>
+          <div class="pricing-price">$0<span>/month</span></div>
+          <ul class="pricing-features">
+            <li>5 date windows per week</li>
+            <li>Basic matching</li>
+            <li>24-hour chat windows</li>
+            <li>Post-date feedback</li>
+          </ul>
+          <a href="#" class="btn btn-secondary" style="width: 100%;">Get Started</a>
+        </div>
+        <div class="pricing-card featured">
+          <div class="pricing-name">Premium</div>
+          <div class="pricing-price">$9.99<span>/month</span></div>
+          <ul class="pricing-features">
+            <li>Unlimited date windows</li>
+            <li>See who liked you</li>
+            <li>Priority matching</li>
+            <li>Extended chat (48 hours)</li>
+            <li>Venue recommendations</li>
+            <li>Read receipts</li>
+          </ul>
+          <a href="#" class="btn btn-primary" style="width: 100%;">Start Free Trial</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <h2>Ready to Stop Swiping?</h2>
+      <p>Join thousands who are actually meeting people IRL.</p>
+      <a href="#" class="btn btn-primary btn-lg">Download IntentMatch Free</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container footer-content">
+      <div class="footer-logo">IntentMatch</div>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Contact</a>
+        <a href="#">Blog</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('nav');
+      if (window.scrollY > 50) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // Animate elements on scroll
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-fade-in');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.problem-card, .solution-card, .step, .pricing-card').forEach(el => {
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "IntentMatch",
+    "slug": "intentmatch",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FF6B6B"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.intentmatch.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "IntentMatch needs camera access to take profile photos.",
+        "NSPhotoLibraryUsageDescription": "IntentMatch needs photo library access to select profile photos.",
+        "NSLocationWhenInUseUsageDescription": "IntentMatch needs location access to find matches near you."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FF6B6B"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.intentmatch.app",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}
