@@ -45,13 +45,16 @@ Secondary: Lifestyle
 17+ (Dating/Mature content)
 
 ## Privacy Policy URL
-[Your Privacy Policy URL]
+https://pominausgh.github.io/dating-apps-mockup/intentmatch-privacy.html
+
+## Terms of Service URL
+https://pominausgh.github.io/dating-apps-mockup/intentmatch-terms.html
 
 ## Support URL
-[Your Support URL]
+support@intentmatch.app
 
 ## Marketing URL (optional)
-[Your Marketing Website URL]
+https://pominausgh.github.io/dating-apps-mockup/
 
 ## Screenshots Needed
 1. Discovery/Swiping screen

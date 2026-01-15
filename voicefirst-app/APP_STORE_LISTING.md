@@ -53,13 +53,16 @@ Secondary: Lifestyle
 17+ (Dating/Mature content)
 
 ## Privacy Policy URL
-[Your Privacy Policy URL]
+https://pominausgh.github.io/dating-apps-mockup/voicefirst-privacy.html
+
+## Terms of Service URL
+https://pominausgh.github.io/dating-apps-mockup/voicefirst-terms.html
 
 ## Support URL
-[Your Support URL]
+support@voicefirst.app
 
 ## Marketing URL (optional)
-[Your Marketing Website URL]
+https://pominausgh.github.io/dating-apps-mockup/
 
 ## Screenshots Needed
 1. Voice intro recording screen
