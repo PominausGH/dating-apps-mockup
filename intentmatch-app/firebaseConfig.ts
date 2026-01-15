@@ -1,10 +1,10 @@
-import { initializeApp } from 'firebase/app';
-import { initializeAuth } from 'firebase/auth';
-// @ts-ignore - getReactNativePersistence exists but TypeScript types are incomplete
-import { getReactNativePersistence } from '@firebase/auth';
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { initializeAuth, getAuth, Auth } from 'firebase/auth';
+// @ts-ignore - getReactNativePersistence exists at runtime but types are incomplete
+import { getReactNativePersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Firebase project configuration from environment variables
 const firebaseConfig = {
@@ -17,13 +17,27 @@ const firebaseConfig = {
   measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || 'YOUR_MEASUREMENT_ID',
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase - check if already initialized to avoid duplicate app error
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize Firebase Auth with React Native persistence
-export const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
-});
+let auth: Auth;
+try {
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)
+  });
+} catch (error: any) {
+  // If auth is already initialized, just get the existing instance
+  if (error.code === 'auth/already-initialized') {
+    auth = getAuth(app);
+  } else {
+    // For any other error, fall back to getAuth
+    console.warn('Firebase Auth initialization warning:', error.message);
+    auth = getAuth(app);
+  }
+}
+
+export { auth };
 
 // Initialize Firebase services
 export const db = getFirestore(app);
